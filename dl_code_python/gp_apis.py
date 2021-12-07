@@ -23,5 +23,19 @@ def gp_gspmm(g, X, dim0, dim1, inverse, norm):
     gpk.gspmm(g, X_dl, res_dl, inverse, norm)  # do not specify the reduce operation
 
     return res
+'''
+def pick_largest_edge_weight(feat, result, inverse):
+    gpk.pick_largest_edge_weight((feat, result, inverse)
 
+def  subtract_max_score(score_max, feat, result, inverse):
+    gpk.subtr subtract_max_score(score_max, feat, result, inverse)
+        
+def sum_scores_for_neighbors(score, result, inverse):
+    gpk.sum_scores_for_neighbors(score, result, inverse)
+        
+def div_edge_score_by_neighborhood(score_sum, score, result, inverse):
+    gpk.div_edge_score_by_neighborhood(score_sum, score, result, inverse)
 
+def mult_edge_score_by_neighborhood(accum, out, result, inverse):
+    gpk.mult_edge_score_by_neighborhood(accum, out, result, inverse)
+'''

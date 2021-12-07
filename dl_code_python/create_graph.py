@@ -8,7 +8,7 @@ def memoryview_to_np(memview, nebr_dt):
     a = arr.view(nebr_dt)
     return a;
 
-def create_csr_graph_simple(ifile, num_vcount, ingestion_flag):
+def create_csr_graph_simple(ifile, num_vcount, ingestion_flag, edge_index):
     num_sources = 1
     num_thread = 2
 
@@ -34,9 +34,17 @@ def create_csr_graph_simple(ifile, num_vcount, ingestion_flag):
     offset_csc = memoryview_to_np(offset_csc1, offset_dt);
     #print('create graph: offset_csc = ', offset_csc)
     nebrs_csr = memoryview_to_np(nebrs_csr1, csr_dt);
-    #print('create graph: nebrs_csr = ', nebrs_csr)
+    #print('create graph: nebrs_csr = ', nebrs_csr.to_list())
     nebrs_csc = memoryview_to_np(nebrs_csc1, csr_dt);
-    #print('create graph: nebrs_csc = ', nebrs_csc)
+    #print('create graph: nebrs_csc = ', nebrs_csc.to_list())
+    
+    for node_num, offset in enumerate(offset_csr):
+        if (node_num == num_vcount): break
+        for i in range(offset_csr[node_num][0], offset_csr[node_num+1][0]):
+            edge_index.append((node_num, nebrs_csr[i][0]))
+        edge_index.append((node_num, node_num)) # self connection
+            
+    #print('edge_index = ', edge_index)    
     
     kernel_graph_flag = 0; #eADJ graph
     # TODO ensure num_vcount implemented

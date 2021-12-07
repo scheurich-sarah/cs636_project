@@ -21,40 +21,40 @@ class GSpmm(th.autograd.Function):
         res = gp_apis.gp_gspmm(graph, dZ, num_vcount, dim, 1, norm)  # do not specify the reduce operation
         return None, res, None, None, None
 
-
+'''
 class EdgeSoftmax(th.autograd.Function):
     @staticmethod
-    def forward(ctx, graph, efficient_score, num_vcount, dim):
-
-        #feat = th.utils.dlpack.to_dlpack(efficient_score)
-        feat = efficient_score
+    def forward(ctx, graph, efficient_score, num_vcount, num_ecount, dim):
+	feat = th.utils.dlpack.to_dlpack(efficient_score)
         score_max = th.zeros(num_vcount, dim)
         result = th.utils.dlpack.to_dlpack(score_max)
-        # todo find max edge value
+        # find max edge value among neighbors
         # for score_max
-	# this function finds the neighbor with the maximum edge weight
-	# for each vertex 
-        graph.spmmw(feat, result, enumOP.eMAX.value, 0)
-        # sub from score_max
+        gp_apis.pick_largest_edge_weight(feat, result, 0)
+        # subtract max edge weight value among neighbor from
+	# all edge weights
         score_max = th.utils.dlpack.to_dlpack(score_max)
+	# this dimension doesn't seem right
         score = th.zeros(num_vcount, dim)
+        # score = th.zeros(num_ecount, dim)
         result = th.utils.dlpack.to_dlpack(score)
-        # todo find score - score_max
-        # for score
-	# this function just performs a subtraction
-        graph.sddmm(score_max, feat, result, enumOP.eSUB.value, 0)
+        gp_apis.subtract_max_score(score_max, feat, result, 0)
         # apply expo for score
         score = th.exp(score)
+        # sum scores for all neighbors
+	# result is size of num_vcount
         score = th.utils.dlpack.to_dlpack(score)
         score_sum = th.zeros(num_vcount, dim)
         result = th.utils.dlpack.to_dlpack(score_sum)
-        # todo score_sum
-        graph.spmmw(score, result, enumOP.eSUM.value, 0)
+        gp_apis.sum_scores_for_neighbors(score, result, 0)
         score_sum = th.utils.dlpack.to_dlpack(score_sum)
+	# this dimension doesn't seem right
         out = th.zeros(num_vcount, dim)
+        # should it be this out = th.zeros(num_ecount, dim)
         result = th.utils.dlpack.to_dlpack(out)
         # todo score % score_sum.out is | E |
-        graph.sddmm(score_sum, score, result, enumOP.eDIV.value, 0)
+	# divide every edge score by the summed score for all neighbors
+        gp_apis.div_edge_score_by_neighborhood(score_sum, score, result, 0)
         ctx.backward_cache = graph, num_vcount, dim, out
         return out
 
@@ -67,16 +67,16 @@ class EdgeSoftmax(th.autograd.Function):
         accum = th.zeros(num_vcount, dim)
         result = th.utils.dlpack.to_dlpack(accum)
         # for accum
-        graph.spmmw(fea, result, enumOP.eSUM.value, 0)
+        gp_apis.sum_scores_for_neighbors(fea, result, 0)
         accum = th.utils.dlpack.to_dlpack(accum)
         out = th.utils.dlpack.to_dlpack(out)
         temp = th.zeros(num_vcount, dim)
         result = th.utils.dlpack.to_dlpack(temp)
-        temp = graph.sddmm(accum, out, result, enumOP.eMUL.value, 0)
+        temp = gp_apis.mult_edge_score_by_neighborhood(accum, out, result, 0)
         grad_score = sds - temp
 
         return None, grad_score, None, None
-
+'''
 '''
 class GSpmv_op(th.autograd.Function):
     @staticmethod
