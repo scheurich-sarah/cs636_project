@@ -43,7 +43,6 @@ def create_csr_graph_simple(ifile, num_vcount, ingestion_flag):
     csr_graph = kernel.init_graph(offset_csr, nebrs_csr, offset_csc, nebrs_csc, kernel_graph_flag, num_vcount);
     print('in create_graph, csr_graph.get_vcount = ', csr_graph.get_vcount())
     print('in create_graph, csr_graph.get_edge_count = ', csr_graph.get_edge_count())
-    print('in create graph, csr_graph get_mt = ', csr_graph.get_mt())
 
     return csr_graph;
 
