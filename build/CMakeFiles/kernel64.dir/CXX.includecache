@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/scsche/cs636_Big_Data/cs636_project/kernel/csr.h
+stdint.h
+/home/scsche/cs636_Big_Data/cs636_project/kernel/stdint.h
+
+/home/scsche/cs636_Big_Data/cs636_project/kernel/kernel.cpp
+cassert
+-
+chrono
+-
+iostream
+-
+limits
+-
+kernel.h
+/home/scsche/cs636_Big_Data/cs636_project/kernel/kernel.h
+
+/home/scsche/cs636_Big_Data/cs636_project/kernel/kernel.h
+csr.h
+/home/scsche/cs636_Big_Data/cs636_project/kernel/csr.h
+op.h
+/home/scsche/cs636_Big_Data/cs636_project/kernel/op.h
+
+/home/scsche/cs636_Big_Data/cs636_project/kernel/op.h
+string
+-
+cstring
+-
+

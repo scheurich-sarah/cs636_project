@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -g -fopenmp -shared  -o kernel64.cpython-38-x86_64-linux-gnu.so CMakeFiles/kernel64.dir/kernel_pybind.cpp.o CMakeFiles/kernel64.dir/kernel.cpp.o 
