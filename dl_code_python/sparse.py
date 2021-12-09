@@ -5,6 +5,42 @@ import gp_apis
 # GSpmm is derived from Pytorch autograd
 # func signature is def gp_gspmm(g, X, dim0, dim1, inverse, norm)
 
+class Attention(th.Autograd.Function):
+    @staticmethod
+    def forward(graph, edge_src_feat, edge_dest_feat):
+        ''' this function calculated edge attention between two neighbors'''
+        dim = edge_src.size(1)
+        print('sparse.py Attn fwd edge_src ' , edge_src_feat)
+        print('sparse.py Attn fwd edge_src.shape ' , edge_src_feat.shape)
+        print('sparse.py Attn fwd edge_dest ' , edge_dest_feat)
+        print('sparse.py Attn fwd edge_dest.shape ' , edge_dest_feat.shape)
+        feat_edge_src_tensor = th.utils.dlpack.to_dlpack(edge_src_feat) 
+        feat_edge_dest_tensor = th.utils.dlpack.to_dlpack(edge_dest_feat)
+        edge_count = graph.get_edge_count()
+        result= th.zeros(edge_count, dim)
+        result_tensor = th.utils.dlpack.to_dlpack(result)
+        # this function is located in gp_api.py
+        gp_apis.forward_edge_attention(graph, feat_edge_src_tensor, feat_edge_dest_tensor, result_tensor)
+        return result
+
+    @staticmethod
+    def backward(graph, edge_feat):
+        ''' this function calculated edge attention between two neighbors'''
+        dim = edge_feat.size(1)
+        print('sparse.py Attn bwd edge_feat ' , edge_feat)
+        print('sparse.py Attn bwd edge_feat.shape ' , edge_feat.shape)
+        feat_edge_tensor = th.utils.dlpack.to_dlpack(edge_feat) 
+        node_count = graph.num_vcount()
+        result1= th.zeros(node_count, dim)
+        result2= th.zeros(node_count, dim)
+        result_tensor1 = th.utils.dlpack.to_dlpack(result1)
+        result_tensor2 = th.utils.dlpack.to_dlpack(result2)
+        # this function is located in gp_api.py
+        gp_apis.backprop_attention(graph, feat_edge_tensor, result_tensor1, result_tensor2)
+        return result1, result2
+
+
+
 class GSpmm(th.autograd.Function):
     
     # must provide
@@ -76,8 +112,8 @@ class EdgeSoftmax(th.autograd.Function):
         grad_score = sds - temp
 
         return None, grad_score, None, None
-'''
-'''
+
+
 class GSpmv_op(th.autograd.Function):
     @staticmethod
     def forward(ctx, X, graph, edge_score_by_softmax, num_vcount, dim):
@@ -111,8 +147,6 @@ class GSpmv_op(th.autograd.Function):
 '''
 
 
-# the gspmv has only 1 input
-# and then apply different operations such as sum, max on it
 # apply calls something in Pytorch that helps it decide whether
 # use the user's forward or backward method
 def run_gspmm(graph, X, norm, num_vcount, dim):
@@ -125,19 +159,9 @@ def run_gspmv_op(graph, X, edge_score_by_softmax, num_vcount, dim):
     return GSpmv_op.apply(X, graph, edge_score_by_softmax, num_vcount, dim)	
 '''
 
-def apply_edge(graph, edge_src, edge_dest):
-    ''' this function performs the attention between two neighbor nodes'''
-    dim = edge_src.size(1)
-    feat_edge_src_tensor = th.utils.dlpack.to_dlpack(edge_src) 
-    feat_edge_dest_tensor = th.utils.dlpack.to_dlpack(edge_dest)
-    edge_count = graph.get_edge_count()
-    result= th.zeros(edge_count, dim)
-    result_tensor = th.utils.dlpack.to_dlpack(result)
-    # this function is located in gp_api.py
-    graph.apply_edges_op2d(feat_edge_src_tensor, feat_edge_dest_tensor, result_tensor)
-    return result
-
+'''
 def edge_softmax(graph, efficient_score, num_vcount, dim):
-    ''' performs the softmax over neighbors'''
+    '' performs the softmax over neighbors''
     result = EdgeSoftmax.apply(graph, efficient_score, num_vcount, dim)
     return result
+'''

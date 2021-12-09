@@ -50,12 +50,6 @@ if __name__ == "__main__":
 
     # convert extracted features to tensors
     feature = torch.tensor(feature)
-    edge_index = torch.tensor(edge_index)
-    #edge_index = edge_index.T
-    connectivity_mask = torch.zeros(num_vcount, num_vcount)
-    for node, nebr in edge_index:
-        connectivity_mask[node, nebr] = 1
-    print('GAT_pubmed connectivity mask = ', connectivity_mask)
 
     train_id = torch.tensor(train_id)
     test_id = torch.tensor(test_id)
@@ -78,19 +72,16 @@ if __name__ == "__main__":
     all_logits = []
     start = datetime.datetime.now()
 
-    data = (feature, connectivity_mask)
     for epoch in range(2):
         # provide data to the model that is required by forward method
-        logits, connectivity_mask = gat_net(data)
+        logits = gat_net(feature)
         #print ('check result')
         #print(logits)
         #print(logits.size())
         # get logits output probability
         all_logits.append(logits.detach())
-        print('all_logits = ', all_logits)
-        print('all_logits.shape = ', all_logits[0].shape)
         # take softmax to predict one answer
-        logp = F.log_softmax(logits[0], 1)
+        logp = F.log_softmax(logits, 1)
         #print("prediction",logp[train_id])
     
         # commpute the negative log likelihood loss for classification

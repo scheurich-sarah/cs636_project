@@ -23,6 +23,13 @@ def gp_gspmm(g, X, dim0, dim1, inverse, norm):
     gpk.gspmm(g, X_dl, res_dl, inverse, norm)  # do not specify the reduce operation
 
     return res
+    
+def forward_attention(graph, feat_edge_src_tensor, feat_edge_dest_tensor, result_tensor):
+
+    gpk.forward_edge_attn(graph, feat_edge_src_tensor, feat_edge_dest_tensor, result_tensor)
+
+def backprop_attention(graph, feat_edge_tensor, result_tensor1, result_tensor2):
+    gpk.backprop_attn(graph, feat_edge_tensor, result_tensor1, result_tensor2)
 '''
 def pick_largest_edge_weight(feat, result, inverse):
     gpk.pick_largest_edge_weight((feat, result, inverse)
